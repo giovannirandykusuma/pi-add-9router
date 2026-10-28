@@ -22,6 +22,26 @@ Pi Coding Agent extension for 9router — AI routing proxy (default `http://loca
 
 Registers 9router as a Pi provider with dynamic model discovery. **Provider only, no web tools** — use [pi-web-access](https://github.com/nicobailon/pi-web-access) for web search/fetch.
 
+## Shikumi-managed installation
+
+[Shikumi's stack.json](https://github.com/giovannirandykusuma/shikumi/blob/fix/9router-thinking-discovery/stack.json)
+is the authoritative full commit pin for this fork. `/shikumi-update --dry` shows
+its plan; `/shikumi-update` removes the old `npm:@arhen/pi-add-9router` registration
+before installing the git commit. It is idempotent and removes npm/git duplicates.
+`/doctor` reports missing/wrong pins and duplicate adapter registrations in its
+stack-sync row. Another host must first receive the Shikumi commit carrying the pin.
+
+For the deployed gateway, configure adapter base URL `https://strangeshi.com`;
+model requests use `https://strangeshi.com/v1`. No direct Codex bypass or manual
+`models.json` override is needed. See the server's
+[capability/deployment contract](https://github.com/giovannirandykusuma/9router/blob/fix/model-thinking-level-discovery/docs/THINKING-LEVEL-DISCOVERY.md).
+
+Development checks: `npm ci --ignore-scripts`, then `npm run check` (requires Bun)
+and `npm pack --dry-run`. The transport test mocks the network while using Pi's
+real completions implementation to assert `reasoning_effort:"max"`. Production
+verification requires a freshly started Pi after an approved server deployment;
+source tests alone do not prove deployment or visible reasoning summaries.
+
 ## Features
 
 - Auto-discovers models and combos from 9router `/v1/models` on startup
