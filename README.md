@@ -1,132 +1,64 @@
-# 🧩 @arhen Pi Extensions
+# pi-add-9router — standalone capability-discovery fork
 
-[![npm scope](https://img.shields.io/badge/npm-@arhen-blue)](https://www.npmjs.com/org/arhen)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+Adapter-only fork of [arhen/pi-extensions](https://github.com/arhen/pi-extensions),
+extracted from `packages/add/pi-add-9router` version **1.0.2** at fork snapshot
+`267bbdbc142942f9741ffd21287b94d77a52bb1f`. Upstream release tag:
+[`@arhen/pi-add-9router@1.0.2`](https://github.com/arhen/pi-extensions/tree/%40arhen%2Fpi-add-9router%401.0.2).
+Original author attribution and [MIT license](LICENSE) are retained. This fork is
+installed from git; it is not the published `@arhen/pi-add-9router` npm release.
 
-Minimalist [Pi Coding Agent](https://github.com/earendil-works/pi) extensions. One package, one problem. No
-config surfaces, minimal context footprint. Independently installable, published separately under the
-`@arhen` npm scope.
+## Install
 
-This is the **single source of truth** — all extensions are maintained here in one monorepo. The old
-standalone repos are archived and point here.
+Requires the [pi coding agent](https://github.com/earendil-works/pi) — install it first: `npm install -g @earendil-works/pi-coding-agent`.
 
-## Layout
-
-```
-packages/
-├── core/        → essential family extensions
-│   ├── pi-core-ask/
-│   ├── pi-core-goal/
-│   ├── pi-core-skill-tool/
-│   ├── pi-core-subagent/
-│   ├── pi-core-todo/
-│   ├── pi-core-tps-stats/
-│   └── pi-core-vision/
-├── add/         → optional family extensions
-│   ├── pi-add-9router/
-│   ├── pi-add-code-diagnostic/
-│   ├── pi-add-commandcode/
-│   ├── pi-add-deliberate/
-│   ├── pi-add-mode/
-│   ├── pi-add-vantis/
-│   ├── pi-add-wafer/
-│   └── pi-senja/
-└── pi-toolset/  → installer for the whole family
+```sh
+# Remove the old adapter first: duplicate provider registrations are unsafe.
+pi remove npm:@arhen/pi-add-9router@1.0.1
+# Substitute the reviewed immutable 40-character commit from Shikumi's stack.json.
+pi install git:github.com/giovannirandykusuma/pi-add-9router@<commit>
 ```
 
-## 🚀 Install
+Pi Coding Agent extension for 9router — AI routing proxy (default `http://localhost:20128`).
 
-The toolset installs the whole family at once — it discovers every published `@arhen/pi-*` package
-from the npm registry at runtime (the toolset itself excluded), so new packages need no update here:
+Registers 9router as a Pi provider with dynamic model discovery. **Provider only, no web tools** — use [pi-web-access](https://github.com/nicobailon/pi-web-access) for web search/fetch.
 
-```bash
-npm i -g @arhen/pi-toolset
-pi-toolset install          # whole family: core + add-ons
-```
+## Features
 
-Or install individual extensions permanently:
+- Auto-discovers models and combos from 9router `/v1/models` on startup
+- Registers `9router` provider with dynamic base URL + API key
+- Cached discovery (fast startup, credential-fingerprinted)
+- models.dev metadata enrichment (context window, max tokens, input modalities)
+- Per-model `capabilities.thinkingLevels` discovery at startup and `/9router-reload`
+- Advertised Pi levels map to `reasoning_effort`; `max` is enabled only when advertised
+- Explicit `reasoning:false` and the global reasoning-off toggle override advertised levels
+- Older servers retain the legacy map through `xhigh`, never inferred `max`; malformed or empty level metadata fails closed
+- This changes capability discovery, not visible reasoning-summary delivery
+- Commands: `/9router-status`, `/9router-models`, `/9router-config`, `/9router-reasoning`, `/9router-reload`
 
-```bash
-pi install npm:@arhen/pi-core-subagent
-```
+## Environment
 
-Try one without adding it permanently:
+| Variable                       | Default                  | Description                          |
+| ------------------------------ | ------------------------ | ------------------------------------ |
+| `NINE_ROUTER_BASE_URL`         | `http://localhost:20128` | 9router endpoint                     |
+| `NINE_ROUTER_API_KEY`          | —                        | API key if 9router requires auth     |
+| `NINE_ROUTER_ENABLE_REASONING` | —                        | `1`/`true` to expose thinking levels |
 
-```bash
-pi -e npm:@arhen/pi-core-vision
-```
+Config persists to `~/.pi/agent/9router-config.json` (or `$PI_CODING_AGENT_DIR/9router-config.json`), shared across Pi instances.
 
-> [!IMPORTANT]
-> Pi extensions run with your full user permissions. Review an extension before installing it from any
-> third party.
+## Commands
 
-## 📦 Core extensions
+| Command              | Purpose                                |
+| -------------------- | -------------------------------------- |
+| `/9router-config`    | Configure base URL, API key, reasoning |
+| `/9router-status`    | Connection status, model counts        |
+| `/9router-models`    | Browse models/combos and switch        |
+| `/9router-reasoning` | Toggle thinking levels                 |
+| `/9router-reload`    | Re-discover models                     |
 
-| Package | Use it for |
-| --- | --- |
-| [`@arhen/pi-core-ask`](packages/core/pi-core-ask) | Structured up-to-4-question questionnaire tool |
-| [`@arhen/pi-core-goal`](packages/core/pi-core-goal) | `/goal` long-running objective: session-log state, token budget, auto-continuation |
-| [`@arhen/pi-core-skill-tool`](packages/core/pi-core-skill-tool) | Skills catalog, lazy `skill` tool |
-| [`@arhen/pi-core-subagent`](packages/core/pi-core-subagent) | Fast in-process subagents, dependency scheduler |
-| [`@arhen/pi-core-todo`](packages/core/pi-core-todo) | Flat/nested todos, direct-child progress, bounded tree UI + blockedBy |
-| [`@arhen/pi-core-tps-stats`](packages/core/pi-core-tps-stats) | Live tokens-per-second stats |
-| [`@arhen/pi-core-vision`](packages/core/pi-core-vision) | Vision fallback for text-only models |
+## Why not pi-9router-ext?
 
-## 🧩 Add-on extensions
-
-| Package | Use it for |
-| --- | --- |
-| [`@arhen/pi-add-9router`](packages/add/pi-add-9router) | 9router provider registration + model discovery |
-| [`@arhen/pi-add-code-diagnostic`](packages/add/pi-add-code-diagnostic) | Repo-scoped typecheck/lint diagnostics |
-| [`@arhen/pi-add-commandcode`](packages/add/pi-add-commandcode) | Command Code Provider API: 58 models, dual-endpoint routing, ZDR |
-| [`@arhen/pi-add-deliberate`](packages/add/pi-add-deliberate) | Read-only `/advise` second opinions and research-first `/plan`, saved to a path |
-| [`@arhen/pi-add-mode`](packages/add/pi-add-mode) | Named modes: instructions + tools + model + effort + subagent model, `/mode` and `alt+m` |
-| [`@arhen/pi-add-vantis`](packages/add/pi-add-vantis) | Vantis integration |
-| [`@arhen/pi-add-wafer`](packages/add/pi-add-wafer) | Wafer integration |
-| [`@arhen/pi-senja`](packages/add/pi-senja) | Gruvbox Material Senja theme, Haiku-style header/footer, state-tinted tool panels |
-
-## 🔧 Manage the set
-
-The [toolset](packages/pi-toolset) manages the family. It reads the package list from npm at
-runtime — there is no static list to keep in sync, and no per-package `add` subcommand: install
-an extra alone with `pi install npm:@arhen/<pkg>`.
-
-```bash
-pi-toolset install   # install the whole family (core + add-ons)
-pi-toolset update    # update the installed ones
-pi-toolset remove    # remove the installed ones
-pi-toolset list      # list the family (toolset itself excluded)
-```
-
-## 🛠 Development
-
-npm owns installs and the only lockfile (`package-lock.json`); Bun is the test runner.
-
-```bash
-npm install                 # hoist all workspaces
-npm run check               # typecheck + biome + tests, every package
-npm run format              # biome format + safe fixes
-```
-
-Every package exposes the same scripts: `typecheck`, `lint`, `test`, `check`. TypeScript settings
-come from `tsconfig.base.json`, lint/format from the root `biome.json`. Shared test fakes for the pi
-extension API live in `test-support/fake-pi.ts`. Tests run offline; network checks are opt-in
-(`npm run test:live --workspace @arhen/pi-add-commandcode`).
-
-Release = check, bump, publish, commit + tag, push, then `pi update` (`scripts/release.sh`):
-
-```bash
-npm run release -- pi-core-subagent              # patch
-npm run release -- --minor pi-add-mode pi-senja  # several at once
-npm run release -- --dry-run pi-core-goal        # check + npm publish --dry-run only
-```
-
-Packages version independently. `pi-toolset` discovers the family from npm at runtime, so it is
-released only when its own script changes.
-
-To release a new extension: add the package under `packages/core/` or `packages/add/` and list it in the
-layout tree and the relevant table above.
+[pi-9router-ext](https://github.com/irfansofyana/pi-9router-ext) bundles the same provider **plus** web tools (`ninerouter_web_search`, `ninerouter_web_fetch`) and web-route discovery (~1.2K tokens extra in context). This package is the provider flow only — same config file format, same env vars, so they're drop-in interchangeable.
 
 ## License
 
-MIT. Each package carries its own `LICENSE` and may include fork attribution.
+MIT

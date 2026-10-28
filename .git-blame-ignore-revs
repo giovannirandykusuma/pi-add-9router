@@ -1,3 +1,0 @@
-# Mechanical biome reformat — hide from git blame:
-#   git config blame.ignoreRevsFile .git-blame-ignore-revs
-30ca71c5c408c7bd6f2d299dcd69f44354da7c1c
